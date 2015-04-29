@@ -1,0 +1,5 @@
+AppBundle\Model\User:
+    properties:
+        email:
+            - NotBlank: { message: 'Provide an e-mail address.' }
+            - Email: { message: 'Provide a correct e-mail address.' }

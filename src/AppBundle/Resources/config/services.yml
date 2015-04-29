@@ -1,0 +1,43 @@
+services:
+    app.handler.email_change:
+        class: AppBundle\Handler\EmailChangeHandler
+        arguments:
+            - @event_dispatcher
+            - @validator
+
+    app.command.email_change:
+        class: AppBundle\Command\EmailChangeCommand
+        tags: [ { name: "console.command" } ]
+        arguments:
+            - @app.handler.email_change
+            - @user_repository
+
+    app.controller.user:
+        class: AppBundle\Controller\UserController
+        arguments:
+            - @app.handler.email_change
+            - @user_repository
+
+    app.event_listener.notify_marketing_system_when_user_email_change:
+        class: AppBundle\EventListener\NotifyMarketingSystemWhenUserEmailChange
+        arguments:
+            - @marketing_system
+        tags: [ { name: "kernel.event_listener", event: "user.email_change", method: "onUserEmailChange" } ]
+
+    app.event_listener.notify_stats_system_when_user_email_change:
+        class: AppBundle\EventListener\NotifyStatsSystemWhenUserEmailChange
+        arguments:
+            - @stats_system
+        tags: [ { name: "kernel.event_listener", event: "user.email_change", method: "onUserEmailChange" } ]
+
+    app.event_listener.log_when_user_email_change:
+        class: AppBundle\EventListener\LogWhenUserEmailChange
+        arguments:
+            - @monolog.logger.user
+        tags: [ { name: "kernel.event_listener", event: "user.email_change", method: "onUserEmailChange" } ]
+
+    app.param_converter.user:
+        class: AppBundle\Request\ParamConverter\UserParamConverter
+        arguments:
+            - @user_repository
+        tags: [ { name: "request.param_converter" } ]
